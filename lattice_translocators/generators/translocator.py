@@ -25,8 +25,8 @@ def make_translocator(extrusion_engine,
         LEF_trans = extrusion_engine(number_of_LEFs, *LEF_arrays, *CTCF_arrays)
 
     if not hasattr(LEF_trans, 'ctcfDeathProb'):
-        LEF_trans.stallProbLeft = 1 - (1 - LEF_trans.stallProbLeft) ** (1. / velocity_multiplier)
-        LEF_trans.stallProbRight = 1 - (1 - LEF_trans.stallProbRight) ** (1. / velocity_multiplier)
+        LEF_trans.stallProbLeft = 1 - (1 - LEF_trans.stallProbLeft) ** (1. / kwargs['velocity_multiplier'])
+        LEF_trans.stallProbRight = 1 - (1 - LEF_trans.stallProbRight) ** (1. / kwargs['velocity_multiplier'])
 
     return LEF_trans
 
