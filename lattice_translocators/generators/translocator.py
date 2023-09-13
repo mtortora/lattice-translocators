@@ -46,7 +46,7 @@ def get_bound_CTCFs(translocator):
     CTCF_left_positions = translocator.stallProbLeft.copy()
     CTCF_right_positions = translocator.stallProbRight.copy()
 
-    CTCF_left_positions = np.nonzero(CTCF_left_positions)[0]
-    CTCF_right_positions = np.nonzero(CTCF_right_positions)[0]
+    CTCF_left_positions = CTCF_left_positions.nonzero()[0]
+    CTCF_right_positions = CTCF_right_positions.nonzero()[0]
     
     return CTCF_left_positions.tolist(), CTCF_right_positions.tolist()
