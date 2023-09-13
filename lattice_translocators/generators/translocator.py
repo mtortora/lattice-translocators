@@ -7,17 +7,8 @@ def make_translocator(extrusion_engine,
                       CTCF_right_positions,
                       **kwargs):
 
-    LEF_separation = kwargs['LEF_separation']
-    velocity_multiplier = kwargs['velocity_multiplier']
-        
-    number_of_replica = kwargs['number_of_replica']
-    monomers_per_replica = kwargs['monomers_per_replica']
-
-    sites_per_monomer = kwargs['sites_per_monomer']
-    sites_per_replica = monomers_per_replica*sites_per_monomer
-
-    number_of_monomers = number_of_replica * monomers_per_replica
-    number_of_LEFs = number_of_monomers // LEF_separation
+    sites_per_replica = kwargs['monomers_per_replica'] * kwargs['sites_per_monomer']
+    number_of_LEFs = (kwargs['number_of_replica'] * kwargs['monomers_per_replica']) // kwargs['LEF_separation']
     
     assert len(site_types) == sites_per_replica, ("Site type array (%d) doesn't match replica lattice size (%d)"
                                                   % (len(site_types), sites_per_replica))
@@ -48,3 +39,14 @@ def get_bound_LEFs(translocator):
     bound_LEF_positions = bound_LEF_positions.reshape((-1, 2))
     
     return bound_LEF_positions.tolist()
+
+
+def get_bound_CTCFs(translocator):
+
+    CTCF_left_positions = translocator.stallProbLeft.copy()
+    CTCF_right_positions = translocator.stallProbRight.copy()
+
+    CTCF_left_positions = np.nonzero(CTCF_left_positions)[0]
+    CTCF_right_positions = np.nonzero(CTCF_right_positions)[0]
+    
+    return CTCF_left_positions.tolist(), CTCF_right_positions.tolist()
