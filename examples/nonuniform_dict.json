@@ -1,0 +1,41 @@
+{
+    "CTCF_facestall": {
+        "strong_CTCF": 1,
+        "weak_CTCF": 0.5
+    },
+    "CTCF_backstall": {
+        "strong_CTCF": 0,
+        "weak_CTCF": 0
+    },
+    "CTCF_offtime": {
+        "strong_CTCF": 0.1,
+        "weak_CTCF": 0.1
+    },
+    "CTCF_lifetime": {
+        "strong_CTCF": 10,
+        "weak_CTCF": 10
+    },
+    "LEF_offtime": {
+        "strong_CTCF": 0.1,
+        "weak_CTCF": 0.1
+    },
+    "LEF_lifetime": {
+        "strong_CTCF": 50,
+        "weak_CTCF": 50
+    },
+    "LEF_stalled_lifetime": {
+        "strong_CTCF": 50,
+        "weak_CTCF": 50
+    },
+    "LEF_pause": {
+        "strong_CTCF": 0,
+        "weak_CTCF": 0
+    },
+    "LEF_separation": 10,
+    "sites_per_monomer": 10,
+    "monomers_per_replica": 100,
+    "number_of_replica": 10,
+    "steps": 10000,
+    "dummy_steps": 0,
+    "velocity_multiplier": 1
+}

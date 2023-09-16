@@ -1,71 +1,67 @@
 from . import arrays
 
 
-def make_translocator(extrusion_engine,
-                      type_list,
-                      site_types,
-                      CTCF_left_positions,
-                      CTCF_right_positions,
-                      **kwargs):
+class Translocator():
 
-    sites_per_replica = kwargs['monomers_per_replica'] * kwargs['sites_per_monomer']
-    number_of_LEFs = (kwargs['number_of_replica'] * kwargs['monomers_per_replica']) // kwargs['LEF_separation']
-    
-    assert len(site_types) == sites_per_replica, ("Site type array (%d) doesn't match replica lattice size (%d)"
-                                                  % (len(site_types), sites_per_replica))
+    def __init__(self,
+                 extrusion_engine,
+                 type_list,
+                 site_types,
+                 ctcf_left_positions,
+                 ctcf_right_positions,
+                 **kwargs):
 
-    # Create arrays
-    LEF_arrays = arrays.make_LEF_arrays(type_list, site_types, **kwargs)
-    CTCF_arrays = arrays.make_CTCF_arrays(type_list, site_types, CTCF_left_positions, CTCF_right_positions, **kwargs)
-    
-    if ('CTCF_offtime' in kwargs) & ('CTCF_lifetime' in kwargs):
-        CTCF_dynamic_arrays = arrays.make_CTCF_dynamic_arrays(type_list, site_types, **kwargs)
-        translocator = extrusion_engine(number_of_LEFs, *LEF_arrays, *CTCF_arrays, *CTCF_dynamic_arrays)
+        sites_per_replica = kwargs['monomers_per_replica'] * kwargs['sites_per_monomer']
+        number_of_LEFs = (kwargs['number_of_replica'] * kwargs['monomers_per_replica']) // kwargs['LEF_separation']
         
-    else:
-        translocator = extrusion_engine(number_of_LEFs, *LEF_arrays, *CTCF_arrays)
+        assert len(site_types) == sites_per_replica, ("Site type array (%d) doesn't match replica lattice size (%d)"
+                                                      % (len(site_types), sites_per_replica))
 
-    if not hasattr(translocator, 'ctcfDeathProb'):
-        translocator.stallProbLeft = 1 - (1-translocator.stallProbLeft) ** (1./kwargs['velocity_multiplier'])
-        translocator.stallProbRight = 1 - (1-translocator.stallProbRight) ** (1./kwargs['velocity_multiplier'])
-
-    return translocator
-    
-    
-def run_translocator(translocator,
-                     steps,
-                     dummy_steps,
-                     sites_per_monomer,
-                     **kwargs):
-
-    LEF_positions = []
-    translocator.steps(dummy_steps*sites_per_monomer)
-    
-    for _ in range(steps):
-        translocator.steps(sites_per_monomer)
+        lef_arrays = arrays.make_LEF_arrays(type_list, site_types, **kwargs)
         
-        bound_LEF_positions = get_bound_LEFs(translocator)
-        LEF_positions.append(bound_LEF_positions)
+        ctcf_arrays = arrays.make_CTCF_arrays(type_list, site_types, ctcf_left_positions, ctcf_right_positions, **kwargs)
+        ctcf_dynamic_arrays = arrays.make_CTCF_dynamic_arrays(type_list, site_types, **kwargs)
         
-    return LEF_positions
+        engine = extrusion_engine(number_of_LEFs, *lef_arrays, *ctcf_arrays, *ctcf_dynamic_arrays)
 
-
-def get_bound_LEFs(translocator):
-
-    LEF_positions = translocator.LEFs
+        if not hasattr(engine, 'ctcf_death_prob'):
+            engine.stall_prob_left = 1 - (1-engine.stall_prob_left) ** (1./kwargs['velocity_multiplier'])
+            engine.stall_prob_right = 1 - (1-engine.stall_prob_right) ** (1./kwargs['velocity_multiplier'])
+        
+        self.lef_trajectory = []
+        
+        self.engine = engine
+        self.params = kwargs
     
-    bound_LEF_positions = LEF_positions[LEF_positions >= 0]
-    bound_LEF_positions = bound_LEF_positions.reshape((-1, 2))
     
-    return bound_LEF_positions.tolist()
+    def run(self, period=None):
 
-
-def get_bound_CTCFs(translocator):
-
-    CTCF_left_positions = translocator.stallProbLeft
-    CTCF_right_positions = translocator.stallProbRight
-
-    CTCF_left_positions = CTCF_left_positions.nonzero()[0]
-    CTCF_right_positions = CTCF_right_positions.nonzero()[0]
+        period = int(period) if period else self.params['sites_per_monomer']
+        self.engine.steps(self.params['dummy_steps'] * period)
     
-    return CTCF_left_positions.tolist(), CTCF_right_positions.tolist()
+        for _ in range(self.params['steps']):
+            self.engine.steps(period)
+        
+            bound_LEF_positions = self.get_bound_LEFs()
+            self.lef_trajectory.append(bound_LEF_positions)
+        
+
+    def get_bound_LEFs(self):
+
+        lef_positions = self.engine.lef_positions
+    
+        bound_LEF_ids = (lef_positions >= 0).all(axis=1)
+        bound_LEF_positions = lef_positions[bound_LEF_ids]
+    
+        return bound_LEF_positions.tolist()
+
+
+    def get_bound_CTCFs(self):
+
+        ctcf_left_positions = self.engine.stall_prob_left
+        ctcf_right_positions = self.engine.stall_prob_right
+
+        bound_left_positions = ctcf_left_positions.nonzero()[0]
+        bound_right_positions = ctcf_right_positions.nonzero()[0]
+    
+        return bound_left_positions.tolist(), bound_right_positions.tolist()

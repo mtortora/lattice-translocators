@@ -27,17 +27,17 @@ def make_site_array(type_list,
 
 def make_CTCF_arrays(type_list,
                      site_types,
-                     CTCF_left_positions,
-                     CTCF_right_positions,
+                     ctcf_left_positions,
+                     ctcf_right_positions,
                      CTCF_facestall,
                      CTCF_backstall,
                      **kwargs):
     
-    stall_left_array = make_site_array(type_list, site_types, CTCF_facestall, at_ids=CTCF_left_positions, **kwargs)
-    stall_right_array = make_site_array(type_list, site_types, CTCF_facestall, at_ids=CTCF_right_positions, **kwargs)
+    stall_left_array = make_site_array(type_list, site_types, CTCF_facestall, at_ids=ctcf_left_positions, **kwargs)
+    stall_right_array = make_site_array(type_list, site_types, CTCF_facestall, at_ids=ctcf_right_positions, **kwargs)
     
-    stall_left_array += make_site_array(type_list, site_types, CTCF_backstall, at_ids=CTCF_right_positions, **kwargs)
-    stall_right_array += make_site_array(type_list, site_types, CTCF_backstall, at_idsids=CTCF_left_positions, **kwargs)
+    stall_left_array += make_site_array(type_list, site_types, CTCF_backstall, at_ids=ctcf_right_positions, **kwargs)
+    stall_right_array += make_site_array(type_list, site_types, CTCF_backstall, at_idsids=ctcf_left_positions, **kwargs)
     
     return [stall_left_array, stall_right_array]
 
@@ -50,13 +50,13 @@ def make_CTCF_dynamic_arrays(type_list,
                              velocity_multiplier,
                              **kwargs):
     
-    CTCF_offtime_array = make_site_array(type_list, site_types, CTCF_offtime, **kwargs)
-    CTCF_lifetime_array = make_site_array(type_list, site_types, CTCF_lifetime, **kwargs)
+    ctcf_offtime_array = make_site_array(type_list, site_types, CTCF_offtime, **kwargs)
+    ctcf_lifetime_array = make_site_array(type_list, site_types, CTCF_lifetime, **kwargs)
     
-    CTCF_birth_array = 1./ CTCF_offtime_array / (velocity_multiplier * sites_per_monomer)
-    CTCF_death_array = 1./ CTCF_lifetime_array / (velocity_multiplier * sites_per_monomer)
+    ctcf_birth_array = 1./ ctcf_offtime_array / (velocity_multiplier * sites_per_monomer)
+    ctcf_death_array = 1./ ctcf_lifetime_array / (velocity_multiplier * sites_per_monomer)
 
-    return [CTCF_birth_array, CTCF_death_array]
+    return [ctcf_birth_array, ctcf_death_array]
     
 
 def make_LEF_arrays(type_list,
