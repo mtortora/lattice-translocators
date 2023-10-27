@@ -23,13 +23,10 @@ class Translocator():
         ctcf_dynamic_arrays = arrays.make_CTCF_dynamic_arrays(type_list, site_types, **kwargs)
         
         engine = extrusion_engine(number_of_LEFs, *lef_arrays, *ctcf_arrays, *ctcf_dynamic_arrays)
-
-        if not hasattr(engine, 'ctcf_death_prob'):
-            engine.stall_prob_left = 1 - (1-engine.stall_prob_left) ** (1./kwargs['velocity_multiplier'])
-            engine.stall_prob_right = 1 - (1-engine.stall_prob_right) ** (1./kwargs['velocity_multiplier'])
         
         self.lef_trajectory = []
-        
+        self.ctcf_trajectory = []
+
         self.engine = engine
         self.params = kwargs
     
@@ -43,8 +40,11 @@ class Translocator():
             self.engine.steps(period)
         
             bound_LEF_positions = self.get_bound_LEFs()
+            bound_CTCF_positions = self.get_bound_CTCFs()
+            
             self.lef_trajectory.append(bound_LEF_positions)
-        
+            self.ctcf_trajectory.append(bound_CTCF_positions)
+
 
     def get_bound_LEFs(self):
 
@@ -61,8 +61,8 @@ class Translocator():
         ctcf_left_positions = self.engine.stall_prob_left
         ctcf_right_positions = self.engine.stall_prob_right
 
-        bound_left_positions = ctcf_left_positions.nonzero()[0]
-        bound_right_positions = ctcf_right_positions.nonzero()[0]
+        bound_left_positions, = ctcf_left_positions.nonzero()
+        bound_right_positions, = ctcf_right_positions.nonzero()
     
-        return bound_left_positions.tolist(), bound_right_positions.tolist()
+        return bound_left_positions.tolist() + bound_right_positions.tolist()
 

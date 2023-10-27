@@ -1,7 +1,7 @@
 {
     "CTCF_facestall": {
         "strong_CTCF": 1,
-        "weak_CTCF": 0.5
+        "weak_CTCF": 1
     },
     "CTCF_backstall": {
         "strong_CTCF": 0,
@@ -9,7 +9,7 @@
     },
     "CTCF_offtime": {
         "strong_CTCF": 0.1,
-        "weak_CTCF": 0.1
+        "weak_CTCF": 10
     },
     "CTCF_lifetime": {
         "strong_CTCF": 10,
@@ -35,7 +35,7 @@
     "sites_per_monomer": 10,
     "monomers_per_replica": 100,
     "number_of_replica": 10,
-    "steps": 10000,
+    "steps": 25000,
     "dummy_steps": 0,
     "velocity_multiplier": 1
 }
