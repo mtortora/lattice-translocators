@@ -25,99 +25,109 @@ class SymmetricExtruder():
         self.pause = pause_prob
         self.stalled_death_prob = stalled_death_prob
 
+        self.sites = np.arange(self.num_site, dtype=int)
+
+        # LEF state equals 0 if LEF is unbound, 1 if bound
+        self.lef_states = np.zeros(self.num_LEF, dtype=int)
         self.lef_positions = np.zeros((self.num_LEF, 2), dtype=int) - 1
         
-        self.stalled = np.zeros((self.num_LEF, 2), dtype=int)
-        self.occupied = np.zeros(self.num_site, dtype=int)
+        self.occupied = np.zeros(self.num_site, dtype=bool)
+        self.stalled = np.zeros((self.num_LEF, 2), dtype=bool)
+
+        self.occupied[0] = self.occupied[-1] = True
         
-        self.occupied[0] = self.occupied[-1] = 1
-
-        self.lef_birth()
-
 
     def lef_birth(self):
     
-        for i in range(self.num_LEF):
-            if np.all(self.lef_positions[i] == -1):
-                while True:
-                    pos = np.random.randint(1, self.num_site-1)
-            
-                    if self.occupied[pos] == 0:
-                        if np.random.random() < self.birth_prob[pos]:
-                            self.lef_positions[i] = pos
-                            self.occupied[pos] = 1
-                    
-                            if (pos < (self.num_site - 2)) and (self.occupied[pos+1] == 0):
-                                if np.random.random() > 0.5:
-                                    self.lef_positions[i, 1] = pos + 1
-                                    self.occupied[pos+1] = 1
-                        
-                        break
+        free_sites = self.sites[~self.occupied]
+        binding_sites = np.random.choice(free_sites, size=self.num_LEF, replace=False)
 
+        rng = np.random.random(self.num_LEF) < self.birth_prob[binding_sites]
+        ids = np.flatnonzero(rng * (self.lef_states == 0))
+                
+        if len(ids) > 0:
+            self.occupied[binding_sites[ids]] = True
+            self.lef_positions[ids] = binding_sites[ids, None]
+        
+            rng_stagger = (np.random.random(len(ids)) < 0.5) * ~self.occupied[binding_sites[ids]+1]
 
+            self.lef_positions[ids, 1] = np.where(rng_stagger,
+                                                  self.lef_positions[ids, 1] + 1,
+                                                  self.lef_positions[ids, 1])
+                                                  
+            self.occupied[binding_sites[ids]+1] = np.where(rng_stagger,
+                                                           True,
+                                                           self.occupied[binding_sites[ids]+1])
+                                                           
+        return ids
+                                                                                
+        
     def lef_death(self):
     
-        for i in range(self.num_LEF):
-            if np.all(self.lef_positions[i] >= 0):
-                if self.stalled[i, 0] == 0:
-                    death_prob1 = self.death_prob[self.lef_positions[i, 0]]
-                else:
-                    death_prob1 = self.stalled_death_prob[self.lef_positions[i, 0]]
-                    
-                if self.stalled[i, 1] == 0:
-                    death_prob2 = self.death_prob[self.lef_positions[i, 1]]
-                else:
-                    death_prob2 = self.stalled_death_prob[self.lef_positions[i, 1]]
-                
-                death_prob = max(death_prob1, death_prob2)
-                
-                if np.random.random() < death_prob:
-                    self.stalled[i] = 0
-                    self.occupied[self.lef_positions[i]] = 0
-                    
-                    self.lef_positions[i] = -1
+        death_prob = np.where(self.stalled,
+                              self.stalled_death_prob[self.lef_positions],
+                              self.death_prob[self.lef_positions])
+                              
+        death_prob = np.max(death_prob, axis=1)
+        
+        rng = np.random.random(self.num_LEF) < death_prob
+        ids = np.flatnonzero(rng * (self.lef_states == 1))
+        
+        self.stalled[ids] = False
+        self.occupied[self.lef_positions[ids]] = False
+        
+        self.lef_positions[ids] = -1
+        
+        return ids
         
 
+    def update_LEF_states(self):
+    
+        ids_death = self.lef_death()
+        ids_birth = self.lef_birth()
+
+        self.lef_states[ids_death] = 0
+        self.lef_states[ids_birth] = 1
+        
+        
     def lef_step(self):
     
         for i in range(self.num_LEF):
-            if np.all(self.lef_positions[i] >= 0):
+            if self.lef_states[i] == 1:
                 stall1 = self.stall_prob_left[self.lef_positions[i, 0]]
                 stall2 = self.stall_prob_right[self.lef_positions[i, 1]]
                                         
                 if np.random.random() < stall1:
-                    self.stalled[i, 0] = 1
+                    self.stalled[i, 0] = True
                 if np.random.random() < stall2:
-                    self.stalled[i, 1] = 1
+                    self.stalled[i, 1] = True
                              
                 cur1, cur2 = self.lef_positions[i]
                 
-                if self.stalled[i, 0] == 0:
-                    if self.occupied[cur1-1] == 0:
+                if not self.stalled[i, 0]:
+                    if not self.occupied[cur1-1]:
                         pause1 = self.pause[cur1]
                         
                         if np.random.random() > pause1:
-                            self.occupied[cur1 - 1] = 1
-                            self.occupied[cur1] = 0
+                            self.occupied[cur1 - 1] = True
+                            self.occupied[cur1] = False
                             
                             self.lef_positions[i, 0] = cur1 - 1
                             
-                if self.stalled[i, 1] == 0:
-                    if self.occupied[cur2 + 1] == 0:
+                if not self.stalled[i, 1]:
+                    if not self.occupied[cur2 + 1]:
                         pause2 = self.pause[cur2]
                         
                         if np.random.random() > pause2:
-                            self.occupied[cur2 + 1] = 1
-                            self.occupied[cur2] = 0
+                            self.occupied[cur2 + 1] = True
+                            self.occupied[cur2] = False
                             
                             self.lef_positions[i, 1] = cur2 + 1
-            
-        
+
+
     def step(self):
     
-        self.lef_death()
-        self.lef_birth()
-        
+        self.update_LEF_states()
         self.lef_step()
         
     
