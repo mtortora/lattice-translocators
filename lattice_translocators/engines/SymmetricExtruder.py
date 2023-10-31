@@ -37,13 +37,13 @@ class SymmetricExtruder():
         self.occupied[0] = self.occupied[-1] = True
         
 
-    def lef_birth(self):
+    def lef_birth(self, state_id=0):
     
         free_sites = self.sites[~self.occupied]
         binding_sites = np.random.choice(free_sites, size=self.num_LEF, replace=False)
 
         rng = np.random.random(self.num_LEF) < self.birth_prob[binding_sites]
-        ids = np.flatnonzero(rng * (self.lef_states == 0))
+        ids = np.flatnonzero(rng * (self.lef_states == state_id))
                 
         if len(ids) > 0:
             self.occupied[binding_sites[ids]] = True
@@ -62,7 +62,7 @@ class SymmetricExtruder():
         return ids
                                                                                 
         
-    def lef_death(self):
+    def lef_death(self, state_id=1):
     
         death_prob = np.where(self.stalled,
                               self.stalled_death_prob[self.lef_positions],
@@ -71,7 +71,7 @@ class SymmetricExtruder():
         death_prob = np.max(death_prob, axis=1)
         
         rng = np.random.random(self.num_LEF) < death_prob
-        ids = np.flatnonzero(rng * (self.lef_states == 1))
+        ids = np.flatnonzero(rng * (self.lef_states == state_id))
         
         self.stalled[ids] = False
         self.occupied[self.lef_positions[ids]] = False
@@ -90,10 +90,10 @@ class SymmetricExtruder():
         self.lef_states[ids_birth] = 1
         
         
-    def lef_step(self):
+    def lef_step(self, state_id=1):
     
         for i in range(self.num_LEF):
-            if self.lef_states[i] == 1:
+            if self.lef_states[i] == state_id:
                 stall1 = self.stall_prob_left[self.lef_positions[i, 0]]
                 stall2 = self.stall_prob_right[self.lef_positions[i, 1]]
                                         
