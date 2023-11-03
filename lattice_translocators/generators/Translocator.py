@@ -29,6 +29,7 @@ class Translocator():
         
         self.lef_trajectory = []
         self.ctcf_trajectory = []
+        self.state_trajectory = []
 
         self.engine = engine
         self.params = kwargs
@@ -47,6 +48,7 @@ class Translocator():
             
             self.lef_trajectory.append(bound_LEF_positions)
             self.ctcf_trajectory.append(bound_CTCF_positions)
+            self.state_trajectory.append(self.engine.lef_states.copy())
 
 
     def get_bound_LEFs(self):
