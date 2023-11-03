@@ -1,0 +1,59 @@
+{
+    "CTCF_facestall": {
+        "A": 1.0
+    },
+    "CTCF_backstall": {
+        "A": 0
+    },
+    "CTCF_offtime": {
+        "A": 0.1
+    },
+    "CTCF_lifetime": {
+        "A": 10
+    },
+    "LEF_offtime": {
+        "A": 710.7508873644018
+    },
+    "LEF_lifetime": {
+        "A": 243.41412012644878
+    },
+    "LEF_stalled_lifetime": {
+        "A": 243.41412012644878
+    },
+    "LEF_pause": {
+        "A": 0
+    },
+    "LEF_states": {
+        "RN": 1,
+        "RB": 2,
+        "RP": 3,
+        "RW": 4
+    },
+    "LEF_transition_rates": {
+        "12": {
+            "A": 0.0125000000000000
+        },
+        "21": {
+            "A": 0.022729325218985172
+        },
+        "23": {
+            "A": 0.007590963232287214
+        },
+        "32": {
+            "A": 0.00133754922567708
+        },
+        "34": {
+            "A": 0.012946667907535889
+        },
+        "43": {
+            "A": 0.018117184463390546
+        }
+    },
+    "LEF_separation": 10,
+    "sites_per_monomer": 1,
+    "monomers_per_replica": 100,
+    "number_of_replica": 10,
+    "steps": 50000,
+    "dummy_steps": 0,
+    "velocity_multiplier": 1
+}

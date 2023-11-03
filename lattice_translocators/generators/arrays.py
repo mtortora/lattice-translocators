@@ -34,11 +34,15 @@ def make_CTCF_arrays(type_list,
                      velocity_multiplier,
                      **kwargs):
     
-    stall_left_array = make_site_array(type_list, site_types, CTCF_facestall, at_ids=ctcf_left_positions, **kwargs)
-    stall_right_array = make_site_array(type_list, site_types, CTCF_facestall, at_ids=ctcf_right_positions, **kwargs)
+    stall_left_array = make_site_array(type_list, site_types, CTCF_facestall,
+                                       at_ids=ctcf_left_positions, **kwargs)
+    stall_right_array = make_site_array(type_list, site_types, CTCF_facestall,
+                                        at_ids=ctcf_right_positions, **kwargs)
     
-    stall_left_array += make_site_array(type_list, site_types, CTCF_backstall, at_ids=ctcf_right_positions, **kwargs)
-    stall_right_array += make_site_array(type_list, site_types, CTCF_backstall, at_idsids=ctcf_left_positions, **kwargs)
+    stall_left_array += make_site_array(type_list, site_types, CTCF_backstall,
+                                        at_ids=ctcf_right_positions, **kwargs)
+    stall_right_array += make_site_array(type_list, site_types, CTCF_backstall,
+                                         at_idsids=ctcf_left_positions, **kwargs)
     
     stall_left_array = 1 - (1-stall_left_array) ** velocity_multiplier
     stall_right_array = 1 - (1-stall_right_array) ** velocity_multiplier
@@ -84,3 +88,23 @@ def make_LEF_arrays(type_list,
     pause_array = make_site_array(type_list, site_types, LEF_pause, **kwargs)
 
     return [birth_array, death_array, stalled_death_array, pause_array]
+
+
+def make_LEF_transition_dict(type_list,
+                             site_types,
+                             LEF_states,
+                             LEF_transition_rates,
+                             sites_per_monomer,
+                             velocity_multiplier,
+                             **kwargs):
+    
+    transition_dict = {}
+    
+    transition_dict["LEF_states"] = LEF_states
+    transition_dict["LEF_transitions"] = {}
+
+    for ids, LEF_rate in LEF_transition_rates.items():
+        rate_array = make_site_array(type_list, site_types, LEF_rate, **kwargs)
+        transition_dict["LEF_transitions"][ids] = rate_array / (velocity_multiplier * sites_per_monomer)
+
+    return transition_dict

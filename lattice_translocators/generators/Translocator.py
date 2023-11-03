@@ -18,11 +18,14 @@ class Translocator():
                                                       % (len(site_types), sites_per_replica))
 
         lef_arrays = arrays.make_LEF_arrays(type_list, site_types, **kwargs)
-        
+        lef_transition_dict = arrays.make_LEF_transition_dict(type_list, site_types, **kwargs)
+
         ctcf_arrays = arrays.make_CTCF_arrays(type_list, site_types, ctcf_left_positions, ctcf_right_positions, **kwargs)
         ctcf_dynamic_arrays = arrays.make_CTCF_dynamic_arrays(type_list, site_types, **kwargs)
         
-        engine = extrusion_engine(number_of_LEFs, *lef_arrays, *ctcf_arrays, *ctcf_dynamic_arrays)
+        engine = extrusion_engine(number_of_LEFs,
+                                  *lef_arrays, *ctcf_arrays, *ctcf_dynamic_arrays,
+                                  **lef_transition_dict)
         
         self.lef_trajectory = []
         self.ctcf_trajectory = []
@@ -65,4 +68,3 @@ class Translocator():
         bound_right_positions, = ctcf_right_positions.nonzero()
     
         return bound_left_positions.tolist() + bound_right_positions.tolist()
-
