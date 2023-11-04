@@ -77,7 +77,7 @@ class MultistateSymmetricExtruder(SymmetricExtruder.SymmetricExtruder):
         for ids, products in zip(ids_list, products_list):
             self.lef_states[ids] = products
             
-        ids_death = ids_list[-1][products_list[-1] == unbound_state_id]
+        ids_death = ids[products == unbound_state_id]
         
         self.update_LEF_arrays(ids_death)
 
