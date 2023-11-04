@@ -70,14 +70,16 @@ class MultistateSymmetricExtruder(SymmetricExtruder.SymmetricExtruder):
     def update_LEF_states(self, unbound_state_id, bound_state_id):
         
         ids_list, products_list = self.lef_transitions(unbound_state_id)
+        ids_birth = self.lef_birth(unbound_state_id)
+        
+        self.lef_states[ids_birth] = bound_state_id
         
         for ids, products in zip(ids_list, products_list):
             self.lef_states[ids] = products
             
-        ids_birth = self.lef_birth(unbound_state_id)
         ids_death = ids_list[-1][products_list[-1] == unbound_state_id]
-            
-        self.update_LEF_arrays(ids_birth, ids_death, unbound_state_id, bound_state_id)
+        
+        self.update_LEF_arrays(ids_death)
 
 
     def step(self):
