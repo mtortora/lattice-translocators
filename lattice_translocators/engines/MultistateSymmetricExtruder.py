@@ -13,8 +13,8 @@ class MultistateSymmetricExtruder(SymmetricExtruder.SymmetricExtruder):
                  pause_prob,
                  stall_prob_left,
                  stall_prob_right,
-                 transition_prob_list,
-                 *args, **lef_transition_dict):
+                 *args,
+                 **lef_transition_dict):
     
         super().__init__(num_LEF,
                          birth_prob,
